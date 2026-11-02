@@ -1,188 +1,84 @@
+```html
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Ứng dụng trực tuyến</title>
-
-<meta name="description" content="Truy cập ứng dụng trực tuyến.">
-
-<meta name="robots" content="noindex, follow">
+<title>Vũ trụ - Huỳnh Cỏ Khô</title>
+<meta name="description" content="Khám phá Vũ trụ - Huỳnh Cỏ Khô">
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html, body {
+body {
   margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #120b08;
-  color: #e9d9b8;
-  font-family: Arial, sans-serif;
-}
-
-#loading {
-  position: fixed;
-  inset: 0;
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  background: #10251f;
+  color: #e7f5ed;
+  font-family: Arial, sans-serif;
   text-align: center;
-  padding: 25px;
+}
+
+.container {
+  padding: 30px;
 }
 
 .spinner {
-  width: 38px;
-  height: 38px;
-  border: 4px solid rgba(255,255,255,.2);
-  border-top-color: #e2b04f;
+  width: 42px;
+  height: 42px;
+  border: 4px solid #ffffff30;
+  border-top-color: #a5e6c2;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-#app {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: #120b08;
-}
-
-#error {
-  display: none;
-  position: fixed;
-  inset: 0;
-  padding: 30px;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-#error a {
-  color: #e2b04f;
-  overflow-wrap: anywhere;
-}
-
+p { color: #c1d8cc; }
 </style>
 </head>
 
 <body>
 
-<div id="loading">
+<div class="container">
   <div class="spinner"></div>
-  <div>Đang kết nối ứng dụng...</div>
-</div>
-
-<div id="error">
-  <div>
-    <h2>Không thể mở ứng dụng</h2>
-    <p>Vui lòng kiểm tra lại đường dẫn Apps Script.</p>
-    <a id="retry" href="#" target="_blank">Mở ứng dụng trực tiếp</a>
-  </div>
+  <h2>Vũ trụ - Huỳnh Cỏ Khô</h2>
+  <p>Đang kết nối ứng dụng...</p>
+  <p>Nếu chưa tự động chuyển trang, hãy
+    <a id="openApp" style="color:#a5e6c2" href="#">
+      nhấn vào đây
+    </a>.
+  </p>
 </div>
 
 <script>
 
-/* =========================================
-   CẤU HÌNH ỨNG DỤNG
-========================================= */
-
-// 1. DÁN LINK GOOGLE APPS SCRIPT VÀO ĐÂY
+// LINK APPS SCRIPT
 const APP_URL = 'https://script.google.com/macros/s/AKfycbzLVjFcbr7SZ1Nd6AUyWZsfRCE4DWlFQIddy1dLsOkwjoHuHzobBjhKBFb49Hw9Q6oy/exec';
 
-// 2. CHẾ ĐỘ HIỂN THỊ
-// iframe   : Giữ link GitHub trên thanh địa chỉ
-// redirect : Chuyển thẳng sang Apps Script
+// KIỂM TRA LINK
+if (/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec\/?$/.test(APP_URL)) {
 
-const MODE = 'redirect';
+  document.getElementById('openApp').href = APP_URL;
 
-// 3. TÊN ỨNG DỤNG
-const APP_NAME = 'Hệ mặt trời và Vũ trụ';
+  // CHUYỂN HƯỚNG TRỰC TIẾP
+  window.location.replace(APP_URL);
 
-// 4. MÀU NỀN
-const BG_COLOR = '#120b08';
-
-
-/* =========================================
-   KHỞI CHẠY
-========================================= */
-
-document.title = APP_NAME;
-
-document.body.style.background = BG_COLOR;
-
-const loading = document.getElementById('loading');
-const errorBox = document.getElementById('error');
-
-function showError() {
-  loading.style.display = 'none';
-  errorBox.style.display = 'flex';
+} else {
+  document.querySelector('.spinner').style.display = 'none';
+  document.querySelector('p').textContent =
+    'Đường dẫn Apps Script không hợp lệ.';
 }
-
-function startApp() {
-
-  const url = APP_URL.trim();
-
-  // Kiểm tra link
-  if (
-    !/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec\/?$/.test(url)
-  ) {
-    showError();
-    return;
-  }
-
-  document.getElementById('retry').href = url;
-
-  // Chuyển hướng trực tiếp
-  if (MODE === 'redirect') {
-    window.location.replace(url);
-    return;
-  }
-
-  // Hiển thị bằng iframe
-  const iframe = document.createElement('iframe');
-
-  iframe.id = 'app';
-  iframe.title = APP_NAME;
-  iframe.src = url;
-
-  iframe.allow = 'autoplay; fullscreen; clipboard-write';
-
-  iframe.setAttribute('allowfullscreen', '');
-
-  iframe.onload = function() {
-    loading.style.display = 'none';
-  };
-
-  iframe.onerror = function() {
-    showError();
-  };
-
-  document.body.appendChild(iframe);
-
-  // Tránh màn hình chờ kéo dài vô hạn
-  setTimeout(function() {
-    if (loading.style.display !== 'none') {
-      loading.style.display = 'none';
-    }
-  }, 15000);
-}
-
-startApp();
 
 </script>
 
 </body>
 </html>
+```
