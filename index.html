@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>Ứng dụng trực tuyến</title>
+
+<meta name="description" content="Truy cập ứng dụng trực tuyến.">
+
+<meta name="robots" content="noindex, follow">
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #120b08;
+  color: #e9d9b8;
+  font-family: Arial, sans-serif;
+}
+
+#loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  text-align: center;
+  padding: 25px;
+}
+
+.spinner {
+  width: 38px;
+  height: 38px;
+  border: 4px solid rgba(255,255,255,.2);
+  border-top-color: #e2b04f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #120b08;
+}
+
+#error {
+  display: none;
+  position: fixed;
+  inset: 0;
+  padding: 30px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+#error a {
+  color: #e2b04f;
+  overflow-wrap: anywhere;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div>Đang kết nối ứng dụng...</div>
+</div>
+
+<div id="error">
+  <div>
+    <h2>Không thể mở ứng dụng</h2>
+    <p>Vui lòng kiểm tra lại đường dẫn Apps Script.</p>
+    <a id="retry" href="#" target="_blank">Mở ứng dụng trực tiếp</a>
+  </div>
+</div>
+
+<script>
+
+/* =========================================
+   CẤU HÌNH ỨNG DỤNG
+========================================= */
+
+// 1. DÁN LINK GOOGLE APPS SCRIPT VÀO ĐÂY
+const APP_URL = 'https://script.google.com/macros/s/AKfycbzLVjFcbr7SZ1Nd6AUyWZsfRCE4DWlFQIddy1dLsOkwjoHuHzobBjhKBFb49Hw9Q6oy/exec';
+
+// 2. CHẾ ĐỘ HIỂN THỊ
+// iframe   : Giữ link GitHub trên thanh địa chỉ
+// redirect : Chuyển thẳng sang Apps Script
+
+const MODE = 'iframe';
+
+// 3. TÊN ỨNG DỤNG
+const APP_NAME = 'Hệ mặt trời và Vũ trụ';
+
+// 4. MÀU NỀN
+const BG_COLOR = '#120b08';
+
+
+/* =========================================
+   KHỞI CHẠY
+========================================= */
+
+document.title = APP_NAME;
+
+document.body.style.background = BG_COLOR;
+
+const loading = document.getElementById('loading');
+const errorBox = document.getElementById('error');
+
+function showError() {
+  loading.style.display = 'none';
+  errorBox.style.display = 'flex';
+}
+
+function startApp() {
+
+  const url = APP_URL.trim();
+
+  // Kiểm tra link
+  if (
+    !/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec\/?$/.test(url)
+  ) {
+    showError();
+    return;
+  }
+
+  document.getElementById('retry').href = url;
+
+  // Chuyển hướng trực tiếp
+  if (MODE === 'redirect') {
+    window.location.replace(url);
+    return;
+  }
+
+  // Hiển thị bằng iframe
+  const iframe = document.createElement('iframe');
+
+  iframe.id = 'app';
+  iframe.title = APP_NAME;
+  iframe.src = url;
+
+  iframe.allow = 'autoplay; fullscreen; clipboard-write';
+
+  iframe.setAttribute('allowfullscreen', '');
+
+  iframe.onload = function() {
+    loading.style.display = 'none';
+  };
+
+  iframe.onerror = function() {
+    showError();
+  };
+
+  document.body.appendChild(iframe);
+
+  // Tránh màn hình chờ kéo dài vô hạn
+  setTimeout(function() {
+    if (loading.style.display !== 'none') {
+      loading.style.display = 'none';
+    }
+  }, 15000);
+}
+
+startApp();
+
+</script>
+
+</body>
+</html>
